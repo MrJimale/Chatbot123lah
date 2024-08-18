@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Ask a Question{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3>
+    Add input to chat with personal chatbot
+  </h3>
+
+  <div>
+    <div class="card text-center mt-3">
+      <div class="card-header">
+        Chat History:
+      </div>
+      <div class="card-body chat-history" id="chatHistory">
+        <!-- Chat messages will be populated here -->
+      </div>
+    </div>
+  </div>
+
+<div class="input-section fixed-bottom d-flex justify-content-center mb-3">
+  <div class="input-group" style="max-width: 400px;">
+    <input class="form-control" placeholder="Add input here" id="userInput">
+    <button class="btn btn-outline-primary" type="button" id="sendButton">Send</button>
+  </div>
+</div>
+</div>
+
+<script>
+  var websocketString = '';
+  if (window.location.hostname === '127.0.0.1') {
+    websocketString = "ws://localhost:8000/ws";
+  } else {
+    websocketString = `wss://${window.location.hostname}/ws`
+  }
+
+  var ws = new WebSocket(websocketString);
+
+  var sendButton = document.getElementById("sendButton");
+  var userInput = document.getElementById("userInput");
+  var chatHistory = document.getElementById("chatHistory");
+
+  sendButton.onclick = function() {
+    var message = userInput.value.trim();
+    if (message) {
+      // Insert user message at the top
+      var userInputDiv = document.createElement("div");
+      userInputDiv.className = "chat-message user-input"; // Use user-input class for user messages
+      userInputDiv.textContent = message;
+
+      // Create a container to hold both the user input and AI response
+      var messagePairDiv = document.createElement("div");
+      messagePairDiv.appendChild(userInputDiv);
+
+      chatHistory.insertBefore(messagePairDiv, chatHistory.firstChild); // Insert the container at the top
+
+      ws.send(message);
+      userInput.value = "";
+
+      // Ensure the chat history scrolls to the top
+      chatHistory.scrollTop = 0;
+
+      // Handle AI response
+      ws.onmessage = function(event) {
+        var aiMessage = event.data.trim(); // Trim whitespace from the message
+
+        // Insert AI response directly below the user input within the same container
+        var aiResponseDiv = document.createElement("div");
+        aiResponseDiv.className = "chat-message ai-response"; // Assign class for styling
+        aiResponseDiv.textContent = aiMessage;
+        messagePairDiv.appendChild(aiResponseDiv); // Append AI response below the user input
+
+        // Scroll to the top to display the latest message pair
+        chatHistory.scrollTop = 0;
+      };
+    }
+  };
+</script>
+{% endblock %}

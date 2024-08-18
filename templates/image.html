@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Image{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Generate an Image</h1>
+
+    {% if image_url %}
+    <div class="card mt-3">
+        <div class="card-header">
+            Prompt: {{ prompt }}
+        </div>
+        <div class="card-body">
+            <img src="{{ image_url }}" class="img-fluid" alt="Generated Image">
+        </div>
+    </div>
+    {% elif error %}
+    <h2 class="mt-5 text-danger">Error</h2>
+    <p>{{ error }}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block footer %}
+<div class="container mt-5">
+    <div class="card input-card">
+        <div class="card-body">
+            <form method="post" class="d-flex" action="/image">
+                <input type="text" class="form-control" id="prompt" name="user_input" placeholder="Describe the image you want to generate..." required>
+                <button type="submit" class="btn btn-primary ml-2">Generate</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
